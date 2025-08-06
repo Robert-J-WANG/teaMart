@@ -1,3 +1,5 @@
+﻿using Microsoft.EntityFrameworkCore;
+
 namespace teaMart
 {
     public class Program
@@ -8,6 +10,10 @@ namespace teaMart
             
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            //==== 添加数据库上下文对象  ======
+            builder.Services.AddDbContext<DbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("dblink")));
 
             var app = builder.Build();
 

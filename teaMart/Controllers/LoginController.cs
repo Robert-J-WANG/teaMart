@@ -9,11 +9,16 @@ namespace teaMart.Controllers
     {
         // 数据库上下文对象，用于访问数据库
         private readonly dbContext _dbContext;
+        // 依赖注入HttpContextAccessor的接口
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+
 
         // 通过依赖注入方式获取数据库上下文
-        public LoginController(dbContext dbContext)
+        public LoginController(dbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: /Login/Index
@@ -37,17 +42,16 @@ namespace teaMart.Controllers
             // 判断用户是否存在，登录是否成功
             if (user != null)
             {
-                // 登录成功，返回成功信息和用户数据
+                // 登录成功，将用户信息存入Session
+                _httpContextAccessor.HttpContext.Session.SetInt32("id", user.Id);
+                _httpContextAccessor.HttpContext.Session.SetString("nickname", user.Nickname);
+                _httpContextAccessor.HttpContext.Session.SetInt32("role", (int)user.Role);
+                _httpContextAccessor.HttpContext.Session.SetString("img2", user.Img);
+                // 登录成功，返回成功信息和用户数据 
                 return Ok(new
                 {
                     code = 200,
                     msg = "登录成功",
-                    data = new
-                    {
-                        userId = user.Id,
-                        userName = user.Nickname,
-                        phone = user.Phone
-                    }
                 });
             }
 
@@ -60,5 +64,19 @@ namespace teaMart.Controllers
 
             // return View(); // 可选：返回视图
         }
+
+        //管理员退出系统
+        public IActionResult Logout()
+        {
+            // 清除Session中的用户信息
+            _httpContextAccessor.HttpContext.Session.Remove("id");
+            _httpContextAccessor.HttpContext.Session.Remove("nickname");
+            _httpContextAccessor.HttpContext.Session.Remove("role");
+            _httpContextAccessor.HttpContext.Session.Remove("img2");
+
+            // 重定向到登录页面
+            return Redirect("/Login/Index");
+        }
+
     }
 }

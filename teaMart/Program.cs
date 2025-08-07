@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using teaMart.Models;
 
+
 namespace teaMart
 {
     public class Program
@@ -15,6 +16,10 @@ namespace teaMart
             //==== 添加数据库上下文对象  ======
             builder.Services.AddDbContext<dbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("dblink")));
+
+            // 添加Session服务
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddSession();
 
             var app = builder.Build();
 
@@ -32,6 +37,9 @@ namespace teaMart
             app.UseRouting();
 
             app.UseAuthorization();
+
+            // 使用Session中间件
+            app.UseSession();
 
             app.MapControllerRoute(
                 name: "default",

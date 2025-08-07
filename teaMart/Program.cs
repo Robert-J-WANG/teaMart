@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using teaMart.Models;
 
 namespace teaMart
 {
@@ -12,7 +13,7 @@ namespace teaMart
             builder.Services.AddControllersWithViews();
 
             //==== 添加数据库上下文对象  ======
-            builder.Services.AddDbContext<DbContext>(options =>
+            builder.Services.AddDbContext<dbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("dblink")));
 
             var app = builder.Build();

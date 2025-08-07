@@ -30,22 +30,68 @@
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon"><i class="fa fa-fw fa-user"></i></div>
-                        <input type="text" name="username" class="form-control" placeholder="Username">
+                        <input type="text" name="username" id="phone" class="form-control" placeholder="Username">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="input-group">
                         <div class="input-group-addon"><i class="fa fa-fw fa-lock"></i></div>
-                        <input type="password" name="password" class="form-control" placeholder="Password">
+                        <input type="password" name="password" id="pwd" class="form-control" placeholder="Password">
                     </div>
                 </div>
             </div>
             <div class="col-xs-6">
                 <div class="checkbox"><label><input type="checkbox"> Remember me</label></div>
             </div><div class="col-xs-6">
-                <button type="submit" class="btn btn-block btn-primary">Sign in</button>
+                <button type="button" onclick="sub()" class="btn btn-block btn-primary">Sign in</button>
             </div>
         </form>
     </div>
 </body>
 </html>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    // 登录表单提交函数
+    function sub(){
+        // 获取输入的手机号和密码
+        var phone = $("#phone").val()
+        var pwd = $("#pwd").val()
+
+        // 前端验证：手机号不能为空
+        if (phone.length === 0){
+            alert("enter your phone number")
+            $("#phone").focus()
+            return false
+        }
+
+        // 前端验证：密码不能为空
+        if (pwd.length === 0){
+            alert("enter your password")
+            $("#pwd").focus()
+            return false
+        }
+        // 通过AJAX向后端发送登录请求
+        $.ajax({
+            url: "Login/Index", // 后端登录接口
+            type: "post",       // 请求方式为POST
+            data: {
+                phone, pwd      // 发送手机号和密码
+            },
+            success: function(res){
+                // 登录成功，跳转到后台首页
+                if(res.code === 200){
+                    location.href = "/Admin/Index"
+                }
+                // 登录失败，弹出错误信息
+                else{
+                    alert(res.msg)
+                }
+            },
+            // 请求出错时的处理
+            error: function(res){
+                alert("request error from backend")
+            }
+        })
+    }
+</script>

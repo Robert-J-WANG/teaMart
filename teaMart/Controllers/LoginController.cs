@@ -13,7 +13,6 @@ namespace teaMart.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-
         // 通过依赖注入方式获取数据库上下文
         public LoginController(dbContext dbContext, IHttpContextAccessor httpContextAccessor)
         {

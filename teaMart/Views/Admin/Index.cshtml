@@ -1,46 +1,133 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿<!-- 注入服务，使用HttpContextAccessor 接口 -->
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject teaMart.Models.dbContext _dbContext
 @{
     Layout = "_BackLayout";
+
+    // 获取 Session 信息
+   
+    var role = HttpContextAccessor.HttpContext.Session.GetInt32("role");
+    var nickname = HttpContextAccessor.HttpContext.Session.GetInt32("nickname");
 }
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">TeaMart </div>
+    <div class="panel-body">
+        <h2>Welcome to TeaMart Admin Dashbaord, you are valid to manage the system</h2>
+        <p>
+            Welcome you, 
+            @if (role == 2)
+            {
+               
+                <b>Super Admin</b>
+            }
+            else
+            {
+                <b>Admin</b>
+            }
+            @nickname 
+        </p>
+    </div>
+</div>
 
 
 <div class="row">
     <div class="col-sm-4">
         <div class="panel panel-default">
-            <div class="panel-heading">C3 Gauge</div>
-            <div class="panel-body">
-                <div id="d1-c1" style="height:150px"></div>
+            <div class="panel-heading">今天(@(DateTime.Now.ToString("yyyy-MM-dd")))平台收入</div>
+            <div class="panel-body" style="text-align:center">
+                <div id="d1-c1" style="font-size:30px; color:red">@ViewBag.todayMoney</div>
             </div>
         </div>
     </div>
     <div class="col-sm-4">
         <div class="panel panel-default">
-            <div class="panel-heading">C3 Gauge</div>
-            <div class="panel-body">
-                <div id="d1-c2" style="height:150px"></div>
+            <div class="panel-heading">本周(@ViewBag.startOfWeek-@ViewBag.endOfWeek)平台收入</div>
+            <div class="panel-body" style="text-align:center">
+                <div id="d1-c1" style="font-size:30px; color:red">@ViewBag.weekMoney</div>
             </div>
         </div>
     </div>
     <div class="col-sm-4">
         <div class="panel panel-default">
-            <div class="panel-heading">C3 Gauge</div>
-            <div class="panel-body">
-                <div id="d1-c3" style="height:150px"></div>
+            <div class="panel-heading">今年(@(DateTime.Now.ToString("yyyy")))平台收入</div>
+            <div class="panel-body" style="text-align:center">
+                <div id="d1-c1" style="font-size:30px; color:red">@ViewBag.yearMoney</div>
             </div>
         </div>
     </div>
 </div>
 <div class="panel panel-default">
-    <div class="panel-heading">C3 Bars</div>
+    <div class="panel-heading text-center" style="font-weight:bold; font-size:18px;">今日订单详情</div>
     <div class="panel-body">
-        <div id="d1-c5" style="height:320px"></div>
+        <table class="table table-striped table-bordered table-hover align-middle">
+            <thead class="thead-dark text-center">
+                <tr>
+                    <th>订单编号</th>
+                    <th>订单金额</th>
+                    <th>是否支付</th>
+                    <th>订单状态</th>
+                    <th>下单时间</th>
+                    <th>下单用户</th>
+                    <th>优惠金额</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                @foreach(Order item in ViewBag.orderList)
+                {
+                    <tr>
+                        <td>@item.OrderNum</td>
+                        <td>@item.SumPrice.ToString("C")</td>
+                        <td>
+                            @if (item.IsPay == 1)
+                            {
+                                <span class="badge bg-success">已支付</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg bg-danger">未支付</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.State == 1)
+                            {
+                                <span class="badge bg-danger">未发货</span>
+                            }
+                            else if (item.State==2)
+                            {
+                                <span class="badge bg-success">已发货</span>
+                            }
+                            else if (item.State==3)
+                            {
+                                <span class="badge bg-info">已签收</span>
+                            }
+                            else if (item.State==4)
+                            {
+                                <span class="badge bg-primary">已评论</span>
+                            }
+                            else if (item.State == 5)
+                            {
+                                <span class="badge bg-secondary">退货中</span>
+                            }
+                            else if (item.State == 6)
+                            {
+                                <span class="badge bg-success">已完成</span>
+                            }
+                            else 
+                            {
+                                <span class="badge bg-danger">已取消</span>
+                            }
+                        </td>
+                        <td>@item.Createtime</td>
+                        <td>@item.UidNavigation.Nickname</td>
+                        <td>@item.DecMoney.ToString("C")</td>
+                        <td><a href="/Orders/Details/@item.Id" class="btn btn-link">查看订单详细</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
-<div class="panel panel-default">
-    <div class="panel-heading">C3 Splines</div>
-    <div class="panel-body">
-        <div id="d1-c4" style="height:320px"></div>
-    </div>
-</div>
+

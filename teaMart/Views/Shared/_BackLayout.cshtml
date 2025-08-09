@@ -1,14 +1,21 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-    Layout = null;
-
-}
-
+﻿
 <!-- 注入服务，使用HttpContextAccessor 接口 -->
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @inject teaMart.Models.dbContext _dbContext
+@{
+    Layout = null;
+
+    // 获取 Session 信息
+    var id = HttpContextAccessor.HttpContext.Session.GetInt32("id");
+    var role = HttpContextAccessor.HttpContext.Session.GetInt32("role");
+    var nickname = HttpContextAccessor.HttpContext.Session.GetString("nickname") ?? "";
+    int count = 0;
+    if (id != null)
+    {
+        int uid = id.Value;
+        count = _dbContext.ChatMessages.Where(m => m.ToUserid == uid && m.IsRead == 0).Count();
+    }
+}
 
 
 <!DOCTYPE html>
@@ -37,7 +44,17 @@
                     <ul class="cm-menu-items">
                         <li class="active"><a href="/" class="sf-house">Dashboard</a></li>
                         <li><a href="/User/Index" class="sf-dashboard">Users</a></li>
-                        <li><a href="/Admins/Index" class="sf-brick">Admins</a></li>
+
+                        @{
+                            // 获取管理员身份信息
+                          
+                            if (role != null && role == 2)
+
+                            {
+                                <li><a href="/Admins/Index" class="sf-brick">Admins</a></li>
+                            }
+                        }
+                        
                         <li class="cm-submenu">
                             <a class="sf-window-layout">ImageChart<span class="caret"></span></a>
                             <ul>
@@ -89,19 +106,11 @@
             </div>
             <!-- 这里需要获取管理员的消息的条数 需要使用session服务注入-->
             
-            @{
-                int count = 0;
-                var id = HttpContextAccessor.HttpContext.Session.GetInt32("id");
-                if (id != null)
-                {
-                    int uid = id.Value;
-                    count = _dbContext.ChatMessages.Where(m => m.ToUserid == uid && m.IsRead == 0).Count();
-                }
-            }
+            
             
             <div class="dropdown pull-right">
-                <button class="btn btn-primary md-notifications-white" data-toggle="dropdown"> <span class="label label-danger">@count</span> </button>
-                <div class="popover cm-popover bottom">
+                <button class="btn btn-primary md-notifications-white" data-toggle="dropdown" onclick="window.location.href='/Admin/Send'"> <span class="label label-danger">@count</span> </button>
+                @* <div class="popover cm-popover bottom">
                     <div class="arrow"></div>
                     <div class="popover-content">
                         <div class="list-group">
@@ -126,7 +135,7 @@
                         </div>
                         <div style="padding:10px"><a class="btn btn-success btn-block" href="/#">Show me more...</a></div>
                     </div>
-                </div>
+                </div> *@
             </div>
 
 
@@ -139,7 +148,7 @@
                             <strong>
                                 @{
                                     // 获取管理员身份信息
-                                    var role = HttpContextAccessor.HttpContext.Session.GetInt32("role");
+                                    
                                     if(role!=null && role == 2)
                                     {
                                         <span class="text-success">(Super Admin)</span>
@@ -149,7 +158,7 @@
                                         <span class="text-success">(Admin)</span>
                                     }
                                 }
-                                @HttpContextAccessor.HttpContext.Session.GetString("nickname")
+                                @nickname
                         
                             </strong></a>
                     </li>
@@ -159,7 +168,7 @@
                         <a href="/Admin/Update"><i class="fa fa-fw fa-cog"></i> Reset Password</a>
                     </li>
                     <li>
-                        <a href="/Login/Logout"><i class="fa fa-fw fa-sign-out"></i> Sign out</a>
+                        <a href="/Login"><i class="fa fa-fw fa-sign-out"></i> Sign out</a>
                     </li>
                 </ul>
             </div>

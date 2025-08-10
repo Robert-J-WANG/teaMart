@@ -1,0 +1,170 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using teaMart.Models;
+
+namespace teaMart.Controllers
+{
+    public class UserController : Controller
+    {
+        private readonly dbContext _context;
+
+        public UserController(dbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: User 用户列表
+        public async Task<IActionResult> Index(string phone="", string nickname="", string sex="", int page=1)
+        {
+            IEnumerable<User> userList = _context.Users.Where(u => u.Role == 0); // 只查询普通用户
+
+            // 
+            if (!string.IsNullOrEmpty(phone))
+            {
+                userList = userList.Where(u => u.Phone.Contains(phone));
+            }
+            if (!string.IsNullOrEmpty(nickname))
+            {
+                userList = userList.Where(u => u.Nickname.Contains(nickname));
+            }
+            if (!string.IsNullOrEmpty(sex))
+            {
+                userList = userList.Where(u => u.Sex.Contains(sex));
+            }
+            ViewBag.Phone = phone;
+            ViewBag.Nickname = nickname;
+            ViewBag.Sex = sex;
+
+            // 分页处理
+            //限制分页的条数
+            int pageSize = 10;
+            //总条数有多少
+            var total = userList.Count();
+            //一页10条的话，总的可以分多少页  total/10
+            // 21条数据 每页10条 问：可以分多少页？  21/10 = 2.1 向上取整 得到3 实际可以分3页
+            ViewBag.pageNum = Math.Ceiling(Convert.ToDecimal(total) / Convert.ToDecimal(pageSize));
+            // 分页算法原理  显示第一页：（1-1）*10 = 0，10 得到的是 0-10条 
+            // 显示第二页：（2-1）*10 = 10，10 得到的是 10-20条 
+            userList = userList.Skip((page - 1) * pageSize).Take(pageSize).OrderByDescending(p => p.Id).ToList();
+
+
+            return View(userList);
+        }
+
+
+
+
+        // GET: User/Details/5  用户详情
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        // GET: User/Create 用户创建
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: User/Create  用户保存
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,Phone,Pwd,Nickname,Sex,Introduce,Age,Img,Mibao,Role")] User user)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(user);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(user);
+        }
+
+        // GET: User/Edit/5 用户编辑
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return View(user);
+        }
+
+        // POST: User/Edit/5 保存用户编辑
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Phone,Pwd,Nickname,Sex,Introduce,Age,Img,Mibao,Role")] User user)
+        {
+            if (id != user.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(user.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(user);
+        }
+
+
+        // POST: User/Delete/5 删除用户
+        public async Task<IActionResult> Delete(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool UserExists(int id)
+        {
+            return _context.Users.Any(e => e.Id == id);
+        }
+    }
+}

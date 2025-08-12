@@ -51,7 +51,7 @@ namespace teaMart.Controllers
             ViewBag.pageNum = Math.Ceiling(Convert.ToDecimal(total) / Convert.ToDecimal(pageSize));
             // 分页算法原理  显示第一页：（1-1）*10 = 0，10 得到的是 0-10条 
             // 显示第二页：（2-1）*10 = 10，10 得到的是 10-20条 
-            userList = userList.Skip((page - 1) * pageSize).Take(pageSize).OrderByDescending(p => p.Id).ToList();
+            userList = userList.OrderByDescending(p => p.Id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
 
             return View(userList);
@@ -146,24 +146,30 @@ namespace teaMart.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Phone,Pwd,Nickname,Sex,Introduce,Age,Img,Mibao,Role")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Phone,Pwd,Nickname,Sex,Introduce,Age,Img,Mibao,Role")] User user,string oldPwd)
         {
+
             if (id != user.Id)
             {
                 return NotFound();
             }
 
-            var nzPhonePattern = @"^02\d{7,9}$";
-            if (!System.Text.RegularExpressions.Regex.IsMatch(user.Phone ?? "", nzPhonePattern))
-            {
-                ModelState.AddModelError("Phone", "请输入有效的新西兰手机号（如021xxxxxxx）");
-                return View(user);
-            }
 
             if (ModelState.IsValid)
             {
                 try
                 {
+
+                   
+                    
+                    //如果输入了新的密码，则加密更新密码
+                    if (oldPwd!=user.Pwd)
+                    {
+                        user.Pwd = PasswordHelper.HashPasswordWithMD5(user.Pwd, PasswordHelper.GenerateSalt());
+                    }
+                    
+                    
+
                     _context.Update(user);
                     await _context.SaveChangesAsync();
                 }

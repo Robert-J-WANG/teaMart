@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using teaMart.CommonUtil;
 using teaMart.Models;
 
 namespace teaMart.Controllers
@@ -89,6 +90,33 @@ namespace teaMart.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Phone,Pwd,Nickname,Sex,Introduce,Age,Img,Mibao,Role")] User user)
         {
+            // 新西兰手机号正则：以02开头，后面7~9位数字
+            var nzPhonePattern = @"^02\d{7,9}$";
+            if (!System.Text.RegularExpressions.Regex.IsMatch(user.Phone ?? "", nzPhonePattern))
+            {
+                ModelState.AddModelError("Phone", "请输入有效的新西兰手机号（如02xxxxxxxx）");
+                return View(user);
+            }
+
+            // 判断用户是否存在
+            var phoneExists = _context.Users.Any(u => u.Phone == user.Phone);
+            if (phoneExists)
+            {
+                ModelState.AddModelError("Phone", "手机号已存在，请使用其他手机号。");
+                return View(user);
+            }
+
+            //对用户当前的密码进行加密处理
+            user.Pwd = PasswordHelper.HashPasswordWithMD5(user.Pwd, PasswordHelper.GenerateSalt());
+            // 设置默认头像
+            if (string.IsNullOrEmpty(user.Img))
+            {
+                user.Img = "/assets/head.png"; // 默认头像路径
+            }
+            // 设置默认角色为普通用户
+            user.Role = 0; // 0表示普通用户
+
+
             if (ModelState.IsValid)
             {
                 _context.Add(user);
@@ -123,6 +151,13 @@ namespace teaMart.Controllers
             if (id != user.Id)
             {
                 return NotFound();
+            }
+
+            var nzPhonePattern = @"^02\d{7,9}$";
+            if (!System.Text.RegularExpressions.Regex.IsMatch(user.Phone ?? "", nzPhonePattern))
+            {
+                ModelState.AddModelError("Phone", "请输入有效的新西兰手机号（如021xxxxxxx）");
+                return View(user);
             }
 
             if (ModelState.IsValid)

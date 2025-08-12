@@ -12,28 +12,32 @@
 </div>
 <hr />
 
-
-
 <div class="row">
     <div class="col-md-4">
+        <!-- 用户创建表单，提交到 UserController 的 Create 方法 -->
         <form asp-action="Create" onsubmit="return checkForm()" id="myForm">
+            <!-- 显示模型验证错误信息 -->
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Phone" class="control-label">Phone</label>
-                <input asp-for="Phone" class="form-control" required />
+                <!-- 手机号输入，要求必填 -->
+                <label asp-for="Phone" class="control-label" >Phone</label>
+                <input asp-for="Phone" id="phone" class="form-control" required />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <!-- 密码输入，要求必填 -->
                 <label asp-for="Pwd" class="control-label">Password</label>
                 <input asp-for="Pwd" class="form-control" required />
                 <span asp-validation-for="Pwd" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <!-- 昵称输入，要求必填 -->
                 <label asp-for="Nickname" class="control-label">Nickname</label>
                 <input asp-for="Nickname" class="form-control" required />
                 <span asp-validation-for="Nickname" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <!-- 性别选择，要求必选 -->
                 <label asp-for="Sex" class="control-label">Sex</label>
                 <select name="sex" class="form-control">
                     <option value="">--select--</option>
@@ -43,30 +47,116 @@
                 <span asp-validation-for="Sex" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <!-- 个人介绍，非必填 -->
                 <label asp-for="Introduce" class="control-label">Introduction</label>
                 <input asp-for="Introduce" class="form-control" />
                 <span asp-validation-for="Introduce" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <!-- 年龄输入，类型为数字 -->
                 <label asp-for="Age" class="control-label">Age</label>
                 <input asp-for="Age" class="form-control" type="number"/> 
                 <span asp-validation-for="Age" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <!-- 头像上传，异步上传图片到服务器 -->
                 <label asp-for="Img" class="control-label">Avatar</label>
-                <input asp-for="Img" class="form-control" />
-                <span asp-validation-for="Img" class="text-danger"></span>
+                <input type="file" id="pic" name="pic" class="form-control" accept="image/*" onchange="upload(this)" >
+                <!-- 隐藏域用于保存上传后图片的路径，提交到后端 -->
+                <input type="hidden" name="Img" id="img" value="" />
+                <!-- 显示上传后的图片预览 -->
+                <div id="showImg"></div>
             </div>
             <div class="form-group">
+                <!-- 密保问题，要求必填 -->
                 <label asp-for="Mibao" class="control-label">Password hint</label>
                 <input asp-for="Mibao" class="form-control" required />
                 <span asp-validation-for="Mibao" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <!-- 提交按钮 -->
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    // 表单验证：校验手机号格式是否为新西兰手机号
+    function checkForm() {
+        var phone = document.getElementById("phone").value.trim();
+        // 新西兰手机号正则：以02开头，后面7~9位数字
+        var nzPhonePattern = /^02\d{7,9}$/;
+        if (!nzPhonePattern.test(phone)) {
+            alert("请输入有效的新西兰手机号（如021xxxxxxx）");
+            document.getElementById("phone").focus();
+            return false; // 阻止表单提交
+        }
+        return true;
+    }
+
+    // 实现异步图片上传
+    function upload(input) {
+        var file = input.files[0];
+        if (!file) {
+            alert("请选择图片文件");
+            return;
+        }
+        var imgPath = input.value;
+        // 检查文件扩展名
+        var strExtension = imgPath.substr(imgPath.lastIndexOf('.') + 1).toLowerCase();
+        if (strExtension != 'jpg' && strExtension != 'gif' && strExtension != 'png' && strExtension != 'bmp') {
+            alert("请选择图片文件");
+            return;
+        }
+        // 检查文件类型
+        if (file.type.search('image') === -1) {
+            alert('只支持上传图片');
+            return;
+        }
+        // 构造 FormData，包含整个表单数据
+        var formData = new FormData($("#myForm")[0]);
+        $.ajax({
+            url: "/Upload/file", // 上传接口
+            type: "post",
+            cache: false,
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (res) {
+                res = res.trim();
+                // 处理后端返回的各种状态码
+                if (res == "209") {
+                    alert("请选择图片！");
+                    return;
+                }
+                if (res == "300") {
+                    alert("上传的图片不能为空图片！");
+                    return;
+                }
+                if (res == "400") {
+                    alert("上传的图片失败！");
+                    return;
+                }
+                // 上传成功，显示图片预览，并将图片路径写入隐藏域
+                $("#showImg").html("<img src='" + res + "' width='150' height='150' /><p style='color:red;'>上传成功！</p>");
+                $("#img").val(res);
+            },
+            error: function () {
+                alert("上传异常！");
+            }
+        });
+    }
+</script>
+
+
+@* 重要说明与注意事项
+•	前端手机号校验：正则表达式必须为 /^02\d{7,9}$/，不要写成 \\d。校验只做格式检查，不能保证号码真实存在。
+•	表单 onsubmit：checkForm() 返回 false 时会阻止表单提交，提升用户体验。
+•	异步图片上传：图片上传前会校验扩展名和类型，防止非图片文件上传。上传成功后将图片路径写入隐藏域 #img，确保后端能接收到图片路径。
+•	隐藏域 Img：必须确保图片上传成功后再提交表单，否则后端接收不到图片路径。
+•	后端也要做校验：前端校验可被绕过，后端必须再次校验手机号格式和图片类型。
+•	浏览器安全限制：input.value 只会显示 C:\fakepath\xxx.jpg，不影响上传。
+•	表单 enctype：如果需要支持文件上传，建议加上 enctype="multipart/form-data"，但本例用的是 AJAX 上传，表单本身不需要。 *@
 

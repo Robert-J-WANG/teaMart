@@ -18,25 +18,27 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Url" class="control-label"></label>
-                <input asp-for="Url" class="form-control" />
+                <input asp-for="Url" class="form-control" required />
                 <span asp-validation-for="Url" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ImageUrl" class="control-label"></label>
-                <input type="file" id="pic" name="ImageUrl" class="form-control" accept="image/*" onchange="upload(this)">
+                <input type="file" id="pic" name="pic" class="form-control" accept="image/*" onchange="upload(this)">
                 <!-- 隐藏域用于保存上传后图片的路径，提交到后端 -->
-                <input type="hidden" name="Img" id="ImageUrl" value="" />
+                <input type="hidden" name="ImageUrl" id="img" value="" required />
                 <!-- 显示上传后的图片预览 -->
                 <div id="showImg"></div>
             </div>
             <div class="form-group">
-                <label asp-for="Createtime" class="control-label"></label>
-                <input asp-for="Createtime" class="form-control" />
-                <span asp-validation-for="Createtime" class="text-danger"></span>
+                <input class="form-control" type="hidden", name="createtime" value="@DateTime.Now" />
             </div>
             <div class="form-group">
                 <label asp-for="State" class="control-label"></label>
-                <input asp-for="State" class="form-control" />
+                <select asp-for="State" class="form-control">
+                    <option value="-1">--select--</option>
+                    <option value="1">Showing</option>
+                    <option value="0">Hidden</option>
+                </select>
                 <span asp-validation-for="State" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -49,19 +51,6 @@
 
 <script src="/lib/jquery/dist/jquery.min.js"></script>
 <script>
-    // 表单验证：校验手机号格式是否为新西兰手机号
-    function checkForm() {
-        var phone = document.getElementById("phone").value.trim();
-        // 新西兰手机号正则：以02开头，后面7~9位数字
-        var nzPhonePattern = /^02\d{7,9}$/;
-        if (!nzPhonePattern.test(phone)) {
-            alert("请输入有效的新西兰手机号（如021xxxxxxx）");
-            document.getElementById("phone").focus();
-            return false; // 阻止表单提交
-        }
-        return true;
-    }
-
     // 实现异步图片上传
     function upload(input) {
         var file = input.files[0];
@@ -108,6 +97,8 @@
                 // 上传成功，显示图片预览，并将图片路径写入隐藏域
                 $("#showImg").html("<img src='" + res + "' width='150' height='150' /><p style='color:red;'>上传成功！</p>");
                 $("#img").val(res);
+                // 自动填充URL输入框
+                $("#Url").val(res);
             },
             error: function () {
                 alert("上传异常！");

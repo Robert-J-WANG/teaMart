@@ -18,7 +18,7 @@ namespace teaMart.Controllers
             _context = context;
         }
 
-        // GET: ImageChart 轮播图列表
+        // GET: ImageChart 轮播图列表(包含搜索）
         public async Task<IActionResult> Index(string url="", int state=-1,int page = 1)
         {
             IEnumerable<ImageChart> imageChartList = _context.ImageCharts;
@@ -61,7 +61,7 @@ namespace teaMart.Controllers
         }
 
 
-        // 轮播图添加保存
+        // 保存添加
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Url,ImageUrl,Createtime,State")] ImageChart imageChart)
@@ -91,7 +91,7 @@ namespace teaMart.Controllers
             return View(imageChart);
         }
 
-        // 轮播图编辑保存
+        // 保存编辑
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Url,ImageUrl,Createtime,State")] ImageChart imageChart)
@@ -127,9 +127,8 @@ namespace teaMart.Controllers
 
 
         // POST: ImageChart/Delete/5   轮播图删除
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        
+        public async Task<IActionResult> Delete(int id)
         {
             var imageChart = await _context.ImageCharts.FindAsync(id);
             if (imageChart != null)

@@ -5,46 +5,136 @@
     Layout = "~/Views/Shared/_BackLayout.cshtml";
 }
 
-<h1>Edit</h1>
+<h3>Edit Image</h3>
 
-<h4>ImageChart</h4>
+<div class="btn btn-primary">
+    <a asp-action="Index" style="text-decoration:none; color:azure">Back to List</a>
+</div>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" onsubmit="return checkForm()" id="myForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+
+            @* 跳转地址 *@
             <div class="form-group">
                 <label asp-for="Url" class="control-label"></label>
                 <input asp-for="Url" class="form-control" />
                 <span asp-validation-for="Url" class="text-danger"></span>
             </div>
+
+            @* 上传图片 *@
             <div class="form-group">
                 <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                <input type="file" id="pic" name="pic" class="form-control" accept="image/*" onchange="upload(this)">
+                <!-- 隐藏域用于保存上传后图片的路径，提交到后端 -->
+                <input type="hidden" name="ImageUrl" id="img" value="@Model.ImageUrl" required />
+                <!-- 显示上传后的图片预览 -->
+                <div id="showImg">
+                    <img src="@Model.ImageUrl" width="100" height="100" />
+                </div>
             </div>
+
+            @* 创建时间 *@
             <div class="form-group">
-                <label asp-for="Createtime" class="control-label"></label>
-                <input asp-for="Createtime" class="form-control" />
-                <span asp-validation-for="Createtime" class="text-danger"></span>
+                <input type="hidden" name="createtime" value="@Model.Createtime" />
+                <input type="hidden" name="id" value="@Model.Id" />
             </div>
+
+            @* 状态 *@
             <div class="form-group">
                 <label asp-for="State" class="control-label"></label>
-                <input asp-for="State" class="form-control" />
-                <span asp-validation-for="State" class="text-danger"></span>
+                <select asp-for="State" class="form-control">
+                    @if (Model.State==1)
+                    {
+                        <option value="1">Showing</option>
+                        <option value="0">Hidden</option>
+                    }
+                    else
+                    {
+                        <option value="0">Hidden</option>
+                        <option value="1">Showing</option>
+                    }
+                </select>
+                
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Edit" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    // 表单验证：校验手机号格式是否为新西兰手机号
+    // function checkForm() {
+    //     var phone = document.getElementById("phone").value.trim();
+    //     新西兰手机号正则：以02开头，后面7~9位数字
+    //     var nzPhonePattern = /^02\d{7,9}$/;
+    //     if (!nzPhonePattern.test(phone)) {
+    //         alert("请输入有效的新西兰手机号（如021xxxxxxx）");
+    //         document.getElementById("phone").focus();
+    //         return false; 阻止表单提交
+    //     }
+    //     return true;
+    // }
+
+    // 实现异步图片上传
+    function upload(input) {
+        var file = input.files[0];
+        if (!file) {
+            alert("请选择图片文件");
+            return;
+        }
+        var imgPath = input.value;
+        // 检查文件扩展名
+        var strExtension = imgPath.substr(imgPath.lastIndexOf('.') + 1).toLowerCase();
+        if (strExtension != 'jpg' && strExtension != 'gif' && strExtension != 'png' && strExtension != 'bmp') {
+            alert("请选择图片文件");
+            return;
+        }
+        // 检查文件类型
+        if (file.type.search('image') === -1) {
+            alert('只支持上传图片');
+            return;
+        }
+        // 构造 FormData，包含整个表单数据
+        var formData = new FormData($("#myForm")[0]);
+        $.ajax({
+            url: "/Upload/file", // 上传接口
+            type: "post",
+            cache: false,
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function (res) {
+                res = res.trim();
+                // 处理后端返回的各种状态码
+                if (res == "209") {
+                    alert("请选择图片！");
+                    return;
+                }
+                if (res == "300") {
+                    alert("上传的图片不能为空图片！");
+                    return;
+                }
+                if (res == "400") {
+                    alert("上传的图片失败！");
+                    return;
+                }
+                // 上传成功，显示图片预览，并将图片路径写入隐藏域
+                $("#showImg").html("<img src='" + res + "' width='150' height='150' /><p style='color:red;'>上传成功！</p>");
+                // 自动填充URL输入框
+                $("#Url").val(res);
+            },
+            error: function () {
+                alert("上传异常！");
+            }
+        });
+    }
+</script>
+
+

@@ -10,19 +10,19 @@ using teaMart.Models;
 
 namespace teaMart.Controllers
 {
-    public class UserController : Controller
+    public class AdminsController : Controller
     {
         private readonly dbContext _context;
 
-        public UserController(dbContext context)
+        public AdminsController(dbContext context)
         {
             _context = context;
         }
 
-        // GET: User 用户列表
+        // GET: User 管理员列表
         public async Task<IActionResult> Index(string phone="", string nickname="", string sex="", int page=1)
         {
-            IEnumerable<User> userList = _context.Users.Where(u => u.Role == 0); // 只查询普通用户
+            IEnumerable<User> userList = _context.Users.Where(u => u.Role == 1); // 只查询普通管理员
 
             // 
             if (!string.IsNullOrEmpty(phone))
@@ -35,7 +35,7 @@ namespace teaMart.Controllers
             }
             if (!string.IsNullOrEmpty(sex))
             {
-                userList = userList.Where(u => u.Sex.Contains(sex));
+                userList = userList.Where(u => u.Sex!=null && u.Sex.Contains(sex));
             }
             ViewBag.Phone = phone;
             ViewBag.Nickname = nickname;
@@ -60,7 +60,7 @@ namespace teaMart.Controllers
 
 
 
-        // GET: User/Details/5  用户详情
+        // GET: User/Details/5  管理员详情
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -78,13 +78,13 @@ namespace teaMart.Controllers
             return View(user);
         }
 
-        // GET: User/Create 用户创建
+        // GET: User/Create 管理员创建
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: User/Create  用户保存
+        // POST: User/Create  管理员保存
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -98,7 +98,7 @@ namespace teaMart.Controllers
                 return View(user);
             }
 
-            // 判断用户是否存在
+            // 判断管理员是否存在
             var phoneExists = _context.Users.Any(u => u.Phone == user.Phone);
             if (phoneExists)
             {
@@ -106,15 +106,15 @@ namespace teaMart.Controllers
                 return View(user);
             }
 
-            //对用户当前的密码进行加密处理
+            //对管理员当前的密码进行加密处理
             user.Pwd = PasswordHelper.HashPasswordWithMD5(user.Pwd, PasswordHelper.GenerateSalt());
             // 设置默认头像
             if (string.IsNullOrEmpty(user.Img))
             {
                 user.Img = "/assets/head.png"; // 默认头像路径
             }
-            // 设置默认角色为普通用户
-            user.Role = 0; // 0表示普通用户
+            // 设置默认角色为普通管理员
+            user.Role = 1; // 0表示普通管理员
 
 
             if (ModelState.IsValid)
@@ -126,7 +126,7 @@ namespace teaMart.Controllers
             return View(user);
         }
 
-        // GET: User/Edit/5 用户编辑
+        // GET: User/Edit/5 管理员编辑
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -142,7 +142,7 @@ namespace teaMart.Controllers
             return View(user);
         }
 
-        // POST: User/Edit/5 保存用户编辑
+        // POST: User/Edit/5 保存管理员编辑
         
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -190,7 +190,7 @@ namespace teaMart.Controllers
         }
 
 
-        // POST: User/Delete/5 删除用户
+        // POST: User/Delete/5 删除管理员
         public async Task<IActionResult> Delete(int id)
         {
             var user = await _context.Users.FindAsync(id);

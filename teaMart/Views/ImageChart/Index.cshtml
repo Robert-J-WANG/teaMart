@@ -1,0 +1,104 @@
+﻿@model IEnumerable<teaMart.Models.ImageChart>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_BackLayout.cshtml";
+}
+
+<h3>Manage ImageChart</h3>
+
+<form action="" method="get">
+    Url: <input type="text" name="url" value="@ViewBag.url" class="form-control" style="width:250px; display:inline-block" />
+  
+    State: <select name="state" class="form-control" style="width:250px; display:inline-block" />
+    <option value="-1">All</option>
+    <option value="1">Showing</option>
+    <option value="0">Hidden</option>
+    <select />
+    <input type="submit" value="Search" class="btn btn-default" />
+    <a asp-action="Create"><input type="button" value="Add Image" class="btn btn-success" /></a>
+</form>
+
+<hr />
+
+@if (Model.Count() == 0)
+{
+    <p>No Results</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Url)
+                </th>
+
+                <th>
+                    Image
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Createtime)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.State)
+                </th>
+              
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="@Html.DisplayFor(modelItem => item.Url)" target="_blank">Show the path</a>
+                    </td>
+
+                    <td>
+                        <img src="@Html.DisplayFor(modelItem => item.ImageUrl)" alt="Image" width="50" height="50" />
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Createtime)
+                    </td>
+                    <td>
+                        @if ( item.State==1)
+                        {
+                            <b class="btn btn-success">Showing</b>
+                        }
+                        else
+                        {
+                            <b class="btn btn-danger">Hidden</b>
+                        }
+                    </td>
+                  
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" onclick="return confirm('Are you sure to delete this?');">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <ul class="pagination" style="display:flex; align-items:center; justify-content:center">
+        @if (ViewBag.PageNum == null || ViewBag.PageNum == 0)
+        {
+            <li>
+                <a href="?page=1">1</a>
+            </li>
+        }
+        else
+        {
+            @for (var i = 1; i <= ViewBag.PageNum; i++)
+            {
+                <li>
+                    <a href="?page=@i&url=@(ViewBag.url)&state=@(ViewBag.state)">@i</a>
+                </li>
+            }
+        }
+
+    </ul>
+
+}
+

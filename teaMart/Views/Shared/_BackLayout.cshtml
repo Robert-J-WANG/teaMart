@@ -43,18 +43,16 @@
                 <div id="cm-menu-scroller">
                     <ul class="cm-menu-items">
                         <li class="active"><a href="/" class="sf-house">Dashboard</a></li>
-                        <li><a href="/User/Index" class="sf-dashboard">Users</a></li>
-
                         @{
                             // 获取管理员身份信息
-                          
+
                             if (role != null && role == 2)
 
                             {
                                 <li><a href="/Admins/Index" class="sf-brick">Admins</a></li>
                             }
                         }
-                        
+                        <li><a href="/User/Index" class="sf-dashboard">Users</a></li>
                         <li class="cm-submenu">
                             <a class="sf-window-layout">ImageChart<span class="caret"></span></a>
                             <ul>
@@ -177,7 +175,7 @@
 
     <!-- 主体内容区域 -->
     <div id="global">
-        <div class="container-fluid" style="background:#fff;">
+        <div class="container-fluid">
             <div class="row cm-fix-height">
                 @RenderBody()
             </div>
@@ -191,5 +189,6 @@
     <script src="/assets/js/bootstrap.min.js"></script>
     <script src="/assets/js/clearmin.min.js"></script>
     <script src="/assets/js/demo/home.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

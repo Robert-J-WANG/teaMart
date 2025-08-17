@@ -1,0 +1,29 @@
+﻿@model teaMart.Models.Category
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_BackLayout.cshtml";
+}
+
+
+<h3>Create Category</h3>
+<div class="btn btn-primary">
+    <a asp-action="Index" style="text-decoration:none; color:azure">Back to List</a>
+</div>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Catename" class="control-label"></label>
+                <input asp-for="Catename" class="form-control" required/>
+                <span asp-validation-for="Catename" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,69 @@
+﻿@model IEnumerable<teaMart.Models.Category>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_BackLayout.cshtml";
+}
+
+<h3>Manage Category</h3>
+
+<form action="" method="get">
+    Category Name: <input type="text" name="catename" value="@ViewBag.catename" class="form-control" style="width:250px; display:inline-block" />
+    <input type="submit" value="Search" class="btn btn-default" />
+    <a asp-action="Create"><input type="button" class="btn btn-success" value="Add Category" /></a>
+</form>
+
+<hr />
+
+@if (Model.Count() == 0)
+{
+    <p>No Results</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Catename)
+                </th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Catename)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" onclick="return confirm('Are you sure to delete this?');">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <ul class="pagination" style="display:flex; align-items:center; justify-content:center">
+        @if (ViewBag.PageNum == null || ViewBag.PageNum == 0)
+        {
+            <li>
+                <a href="?page=1">1</a>
+            </li>
+        }
+        else
+        {
+            @for (var i = 1; i <= ViewBag.PageNum; i++)
+            {
+                <li>
+                    <a href="?page=@i&catename=@(ViewBag.catename)">@i</a>
+                </li>
+            }
+        }
+
+    </ul>
+
+}
+

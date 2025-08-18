@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using teaMart.Models;
+using UEditorNetCore;
 
 
 namespace teaMart
@@ -20,6 +21,10 @@ namespace teaMart
             // 添加Session服务
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSession();
+
+            //添加ueditor服务
+            builder.Services.AddUEditorService();
+            builder.Services.AddMvc();
 
             var app = builder.Build();
 

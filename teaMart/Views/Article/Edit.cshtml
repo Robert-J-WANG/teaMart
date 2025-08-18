@@ -1,50 +1,51 @@
-﻿@model teaMart.Models.Article
+﻿@using Microsoft.AspNetCore.Html
+@model teaMart.Models.Article
 
 @{
     ViewData["Title"] = "Edit";
     Layout = "~/Views/Shared/_BackLayout.cshtml";
 }
 
-<h1>Edit</h1>
 
-<h4>Article</h4>
+<h3>Edit Article</h3>
+
+<div class="btn btn-primary">
+    <a asp-action="Index" style="text-decoration:none; color:azure">Back to List</a>
+</div>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-8">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
+                <input asp-for="Title" class="form-control" required/>
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Detail" class="control-label"></label>
-                <input asp-for="Detail" class="form-control" />
-                <span asp-validation-for="Detail" class="text-danger"></span>
+               
+                <!-- 下面是使用富文本编辑器支持输入文章内容 -->
+                <script id="container" name="Detail" type="text/plain">
+                    @(new HtmlString(Model.Detail))
+                </script>
+                
+                <script type="text/javascript" src="/utf8-net/ueditor.config.js"></script>
+                <script type="text/javascript" src="/utf8-net/ueditor.all.js"></script>
+                <script type="text/javascript" src="/utf8-net/lang/zh-cn/zh-cn.js"></script>
+                <script>
+                    var ue = UE.getEditor("container", {
+                        initialFrameHeight:500
+                    });
+                </script>
             </div>
+                <!-- 文章内容使用完结 -->
+                <input type="hidden" name="Createtime" value="@Model.Createtime" />
+                <input type="hidden" name="Sight" value="@Model.Sight" />
+                <input type="hidden" name="Id" value="@Model.Id" />
             <div class="form-group">
-                <label asp-for="Createtime" class="control-label"></label>
-                <input asp-for="Createtime" class="form-control" />
-                <span asp-validation-for="Createtime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Sight" class="control-label"></label>
-                <input asp-for="Sight" class="form-control" />
-                <span asp-validation-for="Sight" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Edit" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

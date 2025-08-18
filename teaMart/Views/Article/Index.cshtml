@@ -1,0 +1,66 @@
+﻿@model IEnumerable<teaMart.Models.Article>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_BackLayout.cshtml";
+}
+
+<h3>Manage Articles</h3>
+
+<form action="" method="get">
+    Title: <input type="text" name="keyword" value="@ViewBag.keyword" class="form-control" style="width:250px; display:inline-block" />
+    <input type="submit" value="Search" class="btn btn-default" />
+    <a asp-action="Create"><input type="button" class="btn btn-success" value="Add Article" /></a>
+</form>
+
+<hr />
+
+@if (Model.Count() == 0)
+{
+    <p>No Results</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Title)
+                </th>
+
+                <th>
+                    @Html.DisplayNameFor(model => model.Createtime)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Sight)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Createtime)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Sight)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a> |
+                        @* 点击调转到前端页面 *@
+                        <a href="/Home/articleDetail?id=@item.Id" class="btn btn-info" target="_blank">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" onclick="return confirm('Are you sure to delete this user?');">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
